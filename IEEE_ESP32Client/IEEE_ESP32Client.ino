@@ -23,7 +23,7 @@ bool bool_value = true;
 int joyValue = 0;
 
 // MAC Address of responder - edit as required
-uint8_t broadcastAddress[] = {0x24, 0x6F, 0x28, 0xB2, 0x56, 0x7C};
+uint8_t broadcastAddress[] = {0x24, 0x6F, 0x28, 0xB1, 0x4F, 0x88};
 
 // Define a data structure
 typedef struct struct_message {
@@ -82,7 +82,6 @@ void loop() {
   bool_value = !bool_value;
   
   // Format structured data
-  strcpy(myData.a, "Welcome to the Workshop!");
   myData.x = x_value;
   myData.y = y_value;
   
