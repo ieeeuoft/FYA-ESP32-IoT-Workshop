@@ -23,7 +23,7 @@ bool bool_value = true;
 int joyValue = 0;
 
 // MAC Address of responder - edit as required
-uint8_t broadcastAddress[] = {0x24, 0x6F, 0x28, 0xB0, 0x88, 0x50};
+uint8_t broadcastAddress[] = {0x24, 0x6F, 0x28, 0xB2, 0x56, 0x7C};
 
 // Define a data structure
 typedef struct struct_message {
@@ -90,13 +90,16 @@ void loop() {
   myData.d = bool_value;
   
   // Send message via ESP-NOW
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
+  if(x_value > 3000 || x_value < 1000) {
+    esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
    
-  if (result == ESP_OK) {
-    Serial.println("Sending confirmed");
+    if (result == ESP_OK) {
+      Serial.println("Sending confirmed");
+    }
+    else {
+      Serial.println("Sending error");
+    }
   }
-  else {
-    Serial.println("Sending error");
-  }
+  
   delay(200);
 }
