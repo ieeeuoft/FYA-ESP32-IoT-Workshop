@@ -23,15 +23,13 @@ Adafruit_LEDBackpack matrix = Adafruit_LEDBackpack();
 uint16_t delayTime = 1000;
 uint64_t binaryAnd = 0b11111111;
 
-uint64_t gameover[8] = {0x00,0x40,0x40,0x40,0x40,0x40,0x7e,0x00}; //green
-uint64_t xmark[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00}; //red
-uint64_t obstacles[8] = {0x83,0x19,0x00,0x60,0x26,0x06,0xc0,0xc1}; //yellow
+uint64_t gameover[8] = {0x00,0x02,0x02,0x02,0x02,0x02,0x7e,0x00}; //massive L
+uint64_t spaceship = 0x10; //initial position of the spaceship
+uint64_t obstacles[8] = {0x83,0x19,0x00,0x60,0x26,0x06,0xc0,0xc1}; //obstacles
 // Define a data structure
 typedef struct struct_message {
-  char a[32];
-  int b;
-  float c;
-  bool d;
+  int x;
+  int y;
 } struct_message;
 
 int rep = 0;
@@ -40,10 +38,10 @@ boolean dead = false;
 struct_message myData;
 void shiftArrayByOne(uint64_t arr[]) {
     // Save the last element
-    uint64_t lastElement = arr[8- 1];
+    uint64_t lastElement = arr[7];
 
     // Shift elements to the right
-    for (int i = 8 - 1; i > 0; --i) {
+    for (int i = 7; i > 0; --i) {
         arr[i] = arr[i - 1];
     }
 
@@ -52,10 +50,7 @@ void shiftArrayByOne(uint64_t arr[]) {
 }
 
 void emptySpaceship(void) {
-  for(int i=0; i < 8; i++){
-    matrix.displaybuffer[i] = xmark[i];   //red portion
-    //binaryAnd = binaryAnd << 8;
-  }
+  matrix.displaybuffer[6] = spaceship;
 }
 void clearMatrix(void) {
     for(int c=0; c < 8; c++){
@@ -65,35 +60,23 @@ void clearMatrix(void) {
 // Callback function executed when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&myData, incomingData, sizeof(myData));
-  Serial.print("Data received: ");
-  Serial.println(len);
-  Serial.print("Character Value: ");
-  Serial.println(myData.a);
-  Serial.print("Integer Value: ");
-  Serial.println(myData.b);
-  Serial.print("Float Value: ");
-  Serial.println(myData.c);
-  Serial.print("Boolean Value: ");
-  Serial.println(myData.d);
-  Serial.println();
   if (dead) {
     return;
   }
-  if (myData.b > 3000) {
-    if (xmark[6] != 0x80) {
-      xmark[6] <<= 1;
-      matrix.displaybuffer[6] = (xmark[6] << 8) | obstacles[6]; 
+  if (myData.x > 3000) {
+    if (spaceship != 0x80) {
+      spaceship <<= 1;
+      matrix.displaybuffer[6] = (spaceship << 8) | obstacles[6]; 
       matrix.writeDisplay();
     } 
-  } else if (myData.b < 1000) {
-    if (xmark[6] != 0x01){
-      xmark[6] >>= 1;
-      matrix.displaybuffer[6] = (xmark[6] << 8) | obstacles[6]; 
+  } else if (myData.x < 1000) {
+    if (spaceship != 0x01){
+      spaceship >>= 1;
+      matrix.displaybuffer[6] = (spaceship << 8) | obstacles[6]; 
       matrix.writeDisplay();
     }
   }
-  
-  if ((obstacles[6] & xmark[6]) > 0) {
+  if ((obstacles[6] & spaceship) > 0) {
     dead = true;
   }
 }
@@ -122,16 +105,17 @@ void loop() {
   shiftArrayByOne(obstacles);
   for(int i=0; i < 8; i++){
       matrix.displaybuffer[i] = obstacles[i];   //red portion
-      //binaryAnd = binaryAnd << 8;   
+  }
+  if ((obstacles[6] & spaceship) > 0) {
+    dead = true;
   }
   if (dead){
     for(int i = 0; i < 8; i++) {
       matrix.displaybuffer[i] = gameover[i];
      }
      matrix.writeDisplay();
-     delay(100000);
   }
-  matrix.displaybuffer[6] |= (xmark[6] << 8);
+  matrix.displaybuffer[6] |= (spaceship << 8);
   matrix.writeDisplay();
   delay(1000);
 }

@@ -27,10 +27,8 @@ uint8_t broadcastAddress[] = {0x24, 0x6F, 0x28, 0xB2, 0x56, 0x7C};
 
 // Define a data structure
 typedef struct struct_message {
-  char a[32];
-  int b;
-  float c;
-  bool d;
+  int x;
+  int y;
 } struct_message;
 
 // Create a structured object
@@ -85,9 +83,8 @@ void loop() {
   
   // Format structured data
   strcpy(myData.a, "Welcome to the Workshop!");
-  myData.b = x_value;
-  myData.c = (float) y_value / 4095.0f;
-  myData.d = bool_value;
+  myData.x = x_value;
+  myData.y = y_value;
   
   // Send message via ESP-NOW
   if(x_value > 3000 || x_value < 1000) {
